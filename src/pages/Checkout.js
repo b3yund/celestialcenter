@@ -1,3 +1,4 @@
+// src/components/Checkout.js
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
@@ -7,7 +8,7 @@ import { AuthContext } from '../AuthContext';
 import '../styles/Checkout.css';
 
 // **Configuration Constants**
-const BACKEND_URL = 'https://celestialcentral-835108787508.us-central1.run.app'; // Hard-coded backend URL
+const BACKEND_URL = 'https://celestialcentral-835108787508.us-central1.run.app'; // Backend URL
 
 const STRIPE_PUBLISHABLE_KEY_TEST = 'pk_test_51N9va6BN4zP2cNNUC13AU2YRhukbIX01xUKoggNBsdxpbyR1KJKGL5AbcUwgBaAN2iofOpxn8S1gUO8uyZm2hBNH00Heo0LJxF';
 const STRIPE_PUBLISHABLE_KEY_LIVE = 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXX'; // Replace with your Live Publishable Key
@@ -39,6 +40,7 @@ const CheckoutForm = () => {
         const fetchCart = async () => {
             setIsLoading(true);
             try {
+                // Fetch cart items
                 const data = await fetchData(`${BACKEND_URL}/api/cart/${user.id}`);
                 setCartItems(data);
 
@@ -48,9 +50,18 @@ const CheckoutForm = () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ items: data }),
                 });
-                const paymentIntent = await response.json();
-                setClientSecret(paymentIntent.clientSecret);
 
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.statusText}`);
+                }
+
+                const paymentIntent = await response.json();
+
+                if (!paymentIntent.clientSecret) {
+                    throw new Error('PaymentIntent clientSecret not returned');
+                }
+
+                setClientSecret(paymentIntent.clientSecret);
                 setError(null);
             } catch (err) {
                 console.error('Error fetching cart or creating PaymentIntent:', err);
@@ -69,6 +80,7 @@ const CheckoutForm = () => {
 
         if (!stripe || !elements || !clientSecret) {
             console.error('Stripe or Elements not loaded, or PaymentIntent not set up.');
+            setError('Payment system is not ready. Please try again later.');
             return;
         }
 
@@ -125,7 +137,20 @@ const CheckoutForm = () => {
                         ))}
                     </ul>
                     <div className="card-element">
-                        <CardElement />
+                        <CardElement options={{
+                            style: {
+                                base: {
+                                    fontSize: '16px',
+                                    color: '#424770',
+                                    '::placeholder': {
+                                        color: '#aab7c4',
+                                    },
+                                },
+                                invalid: {
+                                    color: '#9e2146',
+                                },
+                            },
+                        }} />
                     </div>
                     <button type="submit" disabled={!stripe || isLoading}>
                         {isLoading ? 'Processing...' : 'Pay Now'}
