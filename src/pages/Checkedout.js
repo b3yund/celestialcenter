@@ -25,9 +25,9 @@ const Checkedout = () => {
     // Function to fetch licenses
     const fetchLicenses = async () => {
       try {
-        const data = await fetchData(`${BACKEND_URL}/api/licenses/${user.id}`);
+        /*const data = await fetchData(`${BACKEND_URL}/api/licenses/${user.id}`);
         setLicenses(data);
-        setLicenseError(null);
+        setLicenseError(null); */
 
         // Fetch products for each license
         const productPromises = data.flatMap((license) =>
@@ -40,8 +40,8 @@ const Checkedout = () => {
         setProducts(downloadedProducts);
       } catch (err) {
         console.error('Error fetching licenses or products:', err);
-        setLicenseError('Failed to fetch licenses or products. Please contact support.');
-        setLicenses([]);
+        //setLicenseError('Failed to fetch licenses or products. Please contact support.');
+        //setLicenses([]);
         setProducts([]);
       }
     };
