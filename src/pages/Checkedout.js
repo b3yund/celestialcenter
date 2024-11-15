@@ -107,20 +107,20 @@ const Checkedout = () => {
               <h2>{license.name}</h2>
               <p><strong>License Key:</strong> {license.licenseKey}</p>
               <p><strong>Uses Remaining:</strong> {license.usesRemaining}</p>
-              <button
-                className={`download-button ${downloadStatus[license.productId]}`}
+              
+              {/* Add console log to debug */}
+              {console.log('License data:', license)}
+              {console.log('Download status:', downloadStatus[license.productId])}
+
+              <button 
+                className={`download-button ${downloadStatus[license.productId] || ''}`}
                 onClick={() => downloadProduct(license.productId, license.name)}
-                disabled={downloadStatus[license.productId] === 'downloading' || 
-                         downloadStatus[license.productId] === 'completed'}
+                disabled={downloadStatus[license.productId] === 'downloading'}
               >
-                {downloadStatus[license.productId] === 'downloading' ? 'Downloading...' :
-                 downloadStatus[license.productId] === 'completed' ? 'Downloaded' :
-                 downloadStatus[license.productId] === 'failed' ? 'Retry Download' :
+                {downloadStatus[license.productId] === 'downloading' ? 'Downloading...' : 
+                 downloadStatus[license.productId] === 'completed' ? 'Downloaded' : 
                  'Download Product'}
               </button>
-              {downloadStatus[license.productId] === 'failed' && 
-                <p className="error-message">Download failed. Please try again.</p>
-              }
             </div>
           ))}
         </div>
