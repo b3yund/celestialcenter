@@ -1,7 +1,7 @@
 // src/utils/fetchData.js
 const fetchData = async (url, options = {}) => {
   try {
-    console.log(`Starting fetch to ${url} with options:`, options);
+    //console.log(`Starting fetch to ${url} with options:`, options);
     const response = await fetch(url, options);
 
     if (!response.ok) {
@@ -14,7 +14,7 @@ const fetchData = async (url, options = {}) => {
 
     if (contentType && contentType.includes('application/json')) {
       const data = await response.json();
-      console.log('Data fetched successfully:', data);
+      //console.log('Data fetched successfully:', data);
       return data;
     } else {
       console.log('Non-JSON response received:', response);

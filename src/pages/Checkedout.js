@@ -21,52 +21,71 @@ const Checkedout = () => {
       navigate('/login');
       return;
     }
-
-    // Function to fetch licenses
-    const fetchLicenses = async () => {
+  
+    // Function to fetch the cart and create licenses
+    const createLicenses = async () => {
       try {
-        /*const data = await fetchData(`${BACKEND_URL}/api/licenses/${user.id}`);
-        setLicenses(data);
-        setLicenseError(null); */
-
-        // Fetch products for each license
-        const productPromises = data.flatMap((license) =>
-          license.items.map((item) =>
-            fetchData(`${BACKEND_URL}/api/products/${item.productId}`)
+        // Fetch the cart data
+        const cartData = await fetchData(`${BACKEND_URL}/api/cart/${user.id}`);
+  
+        if (!cartData || cartData.length === 0) {
+          console.log('Cart is empty. Skipping license creation.');
+          setLicenseError('Your cart is empty. No licenses created.');
+          return;
+        }
+  
+        // Create licenses for the cart products
+        const licenseResponse = await fetchData(`${BACKEND_URL}/api/licenses`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, products: cartData }),
+        });
+  
+        console.log('Licenses created successfully:', licenseResponse);
+        setLicenseError(null);
+  
+        // Fetch products for the created licenses
+        const productPromises = licenseResponse.licenses.flatMap((license) =>
+          license.products.map((product) =>
+            fetchData(`${BACKEND_URL}/api/products/${product.id}`)
           )
         );
-
+  
         const downloadedProducts = await Promise.all(productPromises);
         setProducts(downloadedProducts);
       } catch (err) {
-        console.error('Error fetching licenses or products:', err);
-        //setLicenseError('Failed to fetch licenses or products. Please contact support.');
-        //setLicenses([]);
+        console.error('Error creating licenses or fetching products:', err.message || err);
+        setLicenseError('Failed to create licenses or fetch products. Please contact support.');
         setProducts([]);
       }
     };
-
+  
     // Function to clear the cart
     const clearCart = async () => {
       try {
-        const data = await fetchData(`${BACKEND_URL}/api/cart/clear`, {
+        const clearCartResponse = await fetchData(`${BACKEND_URL}/api/cart/clear`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.id }),
         });
-
-        console.log('Cart successfully cleared:', data);
+  
+        console.log('Cart successfully cleared:', clearCartResponse);
         setCartError(null);
       } catch (err) {
         console.error('Error clearing cart:', err.message || err);
-        setCartError(err.message || 'Failed to clear cart. Please contact support.');
+        setCartError('Failed to clear cart. Please contact support.');
       }
     };
-
-    // Execute both functions
-    fetchLicenses();
-    clearCart();
+  
+    // Execute the license creation first, then clear the cart
+    const processCheckout = async () => {
+      await createLicenses();
+      await clearCart();
+    };
+  
+    processCheckout();
   }, [isAuthenticated, user, navigate, sessionId, BACKEND_URL]);
+  
 
   return (
     <div className="checkedout-container">
