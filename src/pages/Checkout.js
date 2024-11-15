@@ -43,7 +43,7 @@ const CheckoutForm = () => {
                 setCartItems(data);
 
                 // Create a PaymentIntent on the backend
-                const response = await fetch(`${BACKEND_URL}/api/checkout/create-payment-intent`, {
+                const response = await fetch(`${BACKEND_URL}/api/checkout/create-checkout-session`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ items: data }),
