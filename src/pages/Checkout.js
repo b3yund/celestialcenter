@@ -11,7 +11,7 @@ import '../styles/Checkout.css';
 const BACKEND_URL = 'https://celestialcentral-835108787508.us-central1.run.app'; // Hard-coded backend URL
 
 const STRIPE_PUBLISHABLE_KEY_TEST = 'pk_test_51N9va6BN4zP2cNNUC13AU2YRhukbIX01xUKoggNBsdxpbyR1KJKGL5AbcUwgBaAN2iofOpxn8S1gUO8uyZm2hBNH00Heo0LJxF';
-const STRIPE_PUBLISHABLE_KEY_LIVE = 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXX'; // Replace with your Live Publishable Key
+const STRIPE_PUBLISHABLE_KEY_LIVE = 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXX'; // Replace
 
 const STRIPE_MODE = 'test'; // Change to 'live' when switching to Live Mode
 
