@@ -1,19 +1,43 @@
 // src/pages/Signup.js
-import React from 'react';
-import { Link } from 'react-router-dom';
-import '../styles/Signup.css'; // Import the separate Signup CSS
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { createUser } from '../utils/userService';
+import { AuthContext } from '../AuthContext';
+import '../styles/Signup.css';
 
 const Signup = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const { login } = useContext(AuthContext); // Access login from AuthContext
+  const navigate = useNavigate();
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await createUser(name, email, password);
+      console.log('Signup successful:', result);
+      setError(null);
+      login(result.user); // Automatically log in the user
+      navigate('/'); // Redirect to home page
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError(err.message || 'An unexpected error occurred. Please try again.');
+    }
+  };
+
   return (
     <div className="signup-container">
       <h1>Create Account</h1>
-      <form>
+      <form onSubmit={handleSignup}>
         <div className="form-group">
           <label htmlFor="name">Name:</label>
           <input
             id="name"
             type="text"
-            placeholder="Enter your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
           />
         </div>
@@ -22,7 +46,8 @@ const Signup = () => {
           <input
             id="email"
             type="email"
-            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
@@ -31,10 +56,12 @@ const Signup = () => {
           <input
             id="password"
             type="password"
-            placeholder="Create a password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit">Sign Up</button>
       </form>
       <p>

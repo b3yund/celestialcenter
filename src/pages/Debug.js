@@ -1,4 +1,3 @@
-// src/pages/Debug.js
 import React, { useEffect, useState } from 'react';
 
 const Debug = () => {
@@ -6,27 +5,28 @@ const Debug = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log("Starting fetch to /api/products...");
-    
-    fetch('https://celestialcentral.vercel.app/api/products')
-      .then((response) => {
-        console.log("Response received:", response);
-        
+    const fetchDebugData = async () => {
+      console.log('Starting fetch to /api/users/view...');
+      try {
+        const response = await fetch('https://celestialcentral-835108787508.us-central1.run.app/api/users/view');
+        console.log('Response received:', response);
+
         if (!response.ok) {
           throw new Error(`Network response was not ok: ${response.statusText}`);
         }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Data fetched successfully:", data);
+
+        const data = await response.json();
+        console.log('Data fetched successfully:', data);
         setData(data);
-        setError(null); // Clear any previous errors
-      })
-      .catch((err) => {
-        console.error("Fetch error:", err);
+        setError(null);
+      } catch (err) {
+        console.error('Fetch error:', err);
         setError(err.message);
-        setData(null); // Clear any previous data
-      });
+        setData(null);
+      }
+    };
+
+    fetchDebugData();
   }, []);
 
   return (
@@ -36,7 +36,7 @@ const Debug = () => {
         <div style={{ color: 'red' }}>Error: {error}</div>
       ) : data ? (
         <div>
-          <h2>Fetched Data:</h2>
+          <h2>Fetched Users Data:</h2>
           <pre>{JSON.stringify(data, null, 2)}</pre>
         </div>
       ) : (
