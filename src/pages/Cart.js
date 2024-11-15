@@ -12,11 +12,11 @@ const Cart = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    {/*if (!isAuthenticated || !user) {
+  {/*useEffect(() => {
+    if (!isAuthenticated || !user) {
       navigate('/login');
       return;
-    }*/}
+    }
 
     const fetchCart = async () => {
       try {
@@ -67,7 +67,7 @@ const Cart = () => {
         setError('Error removing item');
       }
     }
-  };
+  };*/}
 
   const handleLogout = () => {
     logout();

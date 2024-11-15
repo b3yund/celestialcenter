@@ -22,11 +22,11 @@ const CheckoutForm = () => {
     const stripe = useStripe();
     const elements = useElements();
 
-    useEffect(() => {
-        {/*if (!isAuthenticated || !user) {
+    {/*useEffect(() => {
+        if (!isAuthenticated || !user) {
             navigate('/login');
             return;
-        }*/}
+        }
 
         const fetchCartAndPaymentIntent = async () => {
             setIsLoading(true);
@@ -63,7 +63,7 @@ const CheckoutForm = () => {
         };
 
         fetchCartAndPaymentIntent();
-    }, [isAuthenticated, user, navigate]);
+    }, [isAuthenticated, user, navigate]);*/}
 
     const handlePayment = async (e) => {
         e.preventDefault();
