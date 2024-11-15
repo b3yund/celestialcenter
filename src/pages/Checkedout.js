@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import fetchData from '../utils/fetchData';
 import { AuthContext } from '../AuthContext';
+import '../styles/Checkedout.css';
 
 const Checkedout = () => {
   const { isAuthenticated, user } = useContext(AuthContext);
