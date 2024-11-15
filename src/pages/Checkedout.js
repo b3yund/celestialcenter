@@ -43,18 +43,13 @@ const Checkedout = () => {
       // Function to clear the cart
       const clearCart = async () => {
         try {
-          const response = await fetchData(`${BACKEND_URL}/api/cart/clear`, {
+          const data = await fetchData(`${BACKEND_URL}/api/cart/clear`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: user.id }),
           });
       
-          if (response instanceof Response && !response.ok) {
-            // Handle non-JSON error response
-            throw new Error(`Failed to clear cart. Status: ${response.status}`);
-          }
-      
-          console.log('Cart successfully cleared:', response);
+          console.log('Cart successfully cleared:', data);
           setCartError(null);
         } catch (err) {
           console.error('Error clearing cart:', err.message || err);
