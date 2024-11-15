@@ -10,7 +10,6 @@ import Signup from './pages/Signup';
 import Checkout from './pages/Checkout';
 import Checkedout from './pages/Checkedout';
 import Debug from './pages/Debug';
-import NotFound from './pages/NotFound'; // Optional: Create a NotFound component for undefined routes
 import BackgroundVideo from './components/BackgroundVideo';
 import { AuthProvider, AuthContext } from './AuthContext'; // Import AuthContext and AuthProvider
 import './styles/App.css';
@@ -57,7 +56,6 @@ const AnimatedRoutes = () => {
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/checkedout" element={<Checkedout />} />
               <Route path="/debug" element={<Debug />} />
-              <Route path="*" element={<NotFound />} /> {/* Handle undefined routes */}
             </Routes>
           </div>
         </CSSTransition>
