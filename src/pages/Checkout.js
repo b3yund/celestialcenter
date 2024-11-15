@@ -22,7 +22,7 @@ const stripePublishableKey = STRIPE_MODE === 'live' ? STRIPE_PUBLISHABLE_KEY_LIV
 const stripePromise = loadStripe(stripePublishableKey);
 
 const CheckoutForm = () => {
-    const { isAuthenticated, user, logout } = useContext(AuthContext);
+    const { isAuthenticated, user } = useContext(AuthContext);
     const [cartItems, setCartItems] = useState([]);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -43,12 +43,6 @@ const CheckoutForm = () => {
                 // Fetch cart items
                 const data = await fetchData(`${BACKEND_URL}/api/cart/${user.id}`);
                 setCartItems(data);
-
-                if (data.length === 0) {
-                    setError('Your cart is empty.');
-                    setIsLoading(false);
-                    return;
-                }
 
                 // Create a PaymentIntent on the backend
                 const response = await fetch(`${BACKEND_URL}/api/checkout/create-payment-intent`, {
@@ -119,8 +113,6 @@ const CheckoutForm = () => {
                 setError(paymentResult.error.message);
             } else if (paymentResult.paymentIntent.status === 'succeeded') {
                 console.log('Payment successful');
-                // Clear the cart after successful payment
-                await clearCart();
                 navigate('/checkedout');
             }
         } catch (err) {
@@ -131,39 +123,24 @@ const CheckoutForm = () => {
         }
     };
 
-    // Function to clear the cart
-    const clearCart = async () => {
-        try {
-            await fetchData(
-                `${BACKEND_URL}/api/cart/clear`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: user.id }),
-                }
-            );
-            setCartItems([]);
-        } catch (err) {
-            console.error('Error clearing cart:', err);
-            // Optionally, you can set an error message or handle it as needed
-        }
-    };
-
     return (
         <div className="checkout-container">
             <h1>Checkout</h1>
             {isLoading ? (
                 <p>Loading...</p>
-            ) : error ? (
-                <p className="error-message">{error}</p>
+            ) : cartItems.length === 0 ? (
+                <p>Your cart is empty.</p>
             ) : (
                 <form onSubmit={handlePayment}>
-                    {/* Removed the cart items list display */}
-                    
-                    <div className="payment-summary">
-                        <p><strong>Amount to Pay:</strong> ${calculateGrandTotal().toFixed(2)}</p>
-                    </div>
-
+                    <ul className="cart-items">
+                        {cartItems.map((item) => (
+                            <li key={item.productId}>
+                                <h2>{item.name}</h2>
+                                <p>Quantity: {item.quantity}</p>
+                                <p>Total: ${(item.price * item.quantity).toFixed(2)}</p>
+                            </li>
+                        ))}
+                    </ul>
                     <div className="card-element">
                         <CardElement options={{
                             style: {
@@ -188,14 +165,6 @@ const CheckoutForm = () => {
             {error && <p className="error-message">{error}</p>}
         </div>
     );
-};
-
-// Helper function to calculate grand total
-const calculateGrandTotal = (cartItems) => {
-    return cartItems.reduce((total, item) => {
-        const itemTotal = (item.price ?? 0) * (item.quantity ?? 0);
-        return total + itemTotal;
-    }, 0);
 };
 
 const Checkout = () => (
