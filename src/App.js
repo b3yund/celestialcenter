@@ -11,7 +11,7 @@ import Checkout from './pages/Checkout';
 import Checkedout from './pages/Checkedout';
 import Debug from './pages/Debug';
 import BackgroundVideo from './components/BackgroundVideo';
-import { AuthProvider, AuthContext } from './AuthContext';
+import { AuthProvider, AuthContext } from './AuthContext'; // Import AuthContext and AuthProvider
 import './styles/App.css';
 import './styles/Transitions.css';
 
@@ -37,16 +37,7 @@ const App = () => {
                     <Route path="/" element={<Home />} />
                     <Route path="/products" element={<Product />} />
                     <Route path="/product/:id" element={<Product />} />
-                    <Route
-                      path="/cart"
-                      element={
-                        isAuthenticated ? (
-                          <Cart />
-                        ) : (
-                          <Navigate to="/login" replace />
-                        )
-                      }
-                    />
+                    <Route path="/cart" element={isAuthenticated ? <Cart /> : <Navigate to="/login" replace />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/checkout" element={<Checkout />} />
