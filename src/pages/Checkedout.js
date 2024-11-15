@@ -38,12 +38,41 @@ const Checkedout = () => {
     }
   };
 
+  // Add this helper function
+  const downloadAllProducts = async (products) => {
+    for (const product of products) {
+      try {
+        setDownloadStatus(prev => ({ ...prev, [product.productId]: 'downloading' }));
+        
+        const response = await fetch(`${BACKEND_URL}/api/products/${product.productId}/download`);
+        if (!response.ok) throw new Error('Download failed');
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = product.name;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        setDownloadStatus(prev => ({ ...prev, [product.productId]: 'completed' }));
+        console.log(`Downloaded product: ${product.name}`);
+      } catch (error) {
+        console.error(`Download error for ${product.name}:`, error);
+        setDownloadStatus(prev => ({ ...prev, [product.productId]: 'failed' }));
+      }
+    }
+  };
+
   useEffect(() => {
     if (!isAuthenticated || !user) {
       navigate('/login');
       return;
     }
 
+    // Modify createLicensesAndClearCart
     const createLicensesAndClearCart = async () => {
       try {
         const cartItems = await fetchData(`${BACKEND_URL}/api/cart/${user.id}`);
@@ -52,6 +81,7 @@ const Checkedout = () => {
           return;
         }
 
+        // Create licenses
         const licenseResponse = await fetchData(`${BACKEND_URL}/api/licenses`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -66,18 +96,16 @@ const Checkedout = () => {
         });
         console.log('Licenses created:', licenseResponse);
 
+        // Fetch updated licenses
         const userLicenses = await fetchData(`${BACKEND_URL}/api/licenses/${user.id}`);
         console.log('User licenses fetched:', userLicenses);
         setLicenses(userLicenses.licenses);
 
-        // Initialize download status for all products
-        const initialStatus = {};
-        cartItems.forEach(item => {
-          initialStatus[item.productId] = 'pending';
-        });
-        setDownloadStatus(initialStatus);
+        // Download all products
+        await downloadAllProducts(cartItems);
+        console.log('All downloads completed');
 
-        // Clear cart after everything is set up
+        // Clear cart only after downloads complete
         await fetchData(`${BACKEND_URL}/api/cart/clear`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
@@ -107,20 +135,6 @@ const Checkedout = () => {
               <h2>{license.name}</h2>
               <p><strong>License Key:</strong> {license.licenseKey}</p>
               <p><strong>Uses Remaining:</strong> {license.usesRemaining}</p>
-              
-              {/* Add console log to debug */}
-              {console.log('License data:', license)}
-              {console.log('Download status:', downloadStatus[license.productId])}
-
-              <button 
-                className={`download-button ${downloadStatus[license.productId] || ''}`}
-                onClick={() => downloadProduct(license.productId, license.name)}
-                disabled={downloadStatus[license.productId] === 'downloading'}
-              >
-                {downloadStatus[license.productId] === 'downloading' ? 'Downloading...' : 
-                 downloadStatus[license.productId] === 'completed' ? 'Downloaded' : 
-                 'Download Product'}
-              </button>
             </div>
           ))}
         </div>
