@@ -48,19 +48,20 @@ const Checkedout = () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: user.id }),
           });
-  
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to clear cart');
+      
+          if (response instanceof Response && !response.ok) {
+            // Handle non-JSON error response
+            throw new Error(`Failed to clear cart. Status: ${response.status}`);
           }
-  
-          console.log('Cart successfully cleared');
+      
+          console.log('Cart successfully cleared:', response);
           setCartError(null);
         } catch (err) {
-          console.error('Error clearing cart:', err);
-          setCartError('Failed to clear cart. Please contact support.');
+          console.error('Error clearing cart:', err.message || err);
+          setCartError(err.message || 'Failed to clear cart. Please contact support.');
         }
       };
+      
   
       // Execute both functions independently
       //fetchLicenses();

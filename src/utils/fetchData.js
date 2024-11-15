@@ -6,6 +6,7 @@ const fetchData = async (url, options = {}) => {
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`Error from server (${response.status}): ${errorText}`);
       throw new Error(`Error: ${response.status} - ${errorText}`);
     }
 
@@ -16,8 +17,8 @@ const fetchData = async (url, options = {}) => {
       console.log('Data fetched successfully:', data);
       return data;
     } else {
-      // For non-JSON responses, return the response as is
-      return response;
+      console.log('Non-JSON response received:', response);
+      return response; // Return raw response for non-JSON content
     }
   } catch (error) {
     console.error('Fetch error:', error);
