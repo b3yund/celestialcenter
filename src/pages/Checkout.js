@@ -25,7 +25,8 @@ const CheckoutForm = () => {
     const { isAuthenticated, user } = useContext(AuthContext);
     const [cartItems, setCartItems] = useState([]);
     const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // For data loading
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false); // For payment processing
     const [clientSecret, setClientSecret] = useState(null);
     const navigate = useNavigate();
     const stripe = useStripe();
@@ -90,7 +91,7 @@ const CheckoutForm = () => {
             return;
         }
 
-        setIsLoading(true);
+        setIsProcessingPayment(true);
 
         try {
             const cardElement = elements.getElement(CardElement);
@@ -114,12 +115,15 @@ const CheckoutForm = () => {
             } else if (paymentResult.paymentIntent.status === 'succeeded') {
                 console.log('Payment successful');
                 navigate('/checkedout');
+            } else {
+                console.error('Unexpected payment status:', paymentResult.paymentIntent.status);
+                setError('Payment failed. Please try again.');
             }
         } catch (err) {
             console.error('Payment failed:', err);
             setError('Failed to process payment. Please try again.');
         } finally {
-            setIsLoading(false);
+            setIsProcessingPayment(false);
         }
     };
 
@@ -142,23 +146,25 @@ const CheckoutForm = () => {
                         ))}
                     </ul>
                     <div className="card-element">
-                        <CardElement options={{
-                            style: {
-                                base: {
-                                    fontSize: '16px',
-                                    color: '#424770',
-                                    '::placeholder': {
-                                        color: '#aab7c4',
+                        <CardElement
+                            options={{
+                                style: {
+                                    base: {
+                                        fontSize: '16px',
+                                        color: '#424770',
+                                        '::placeholder': {
+                                            color: '#aab7c4',
+                                        },
+                                    },
+                                    invalid: {
+                                        color: '#9e2146',
                                     },
                                 },
-                                invalid: {
-                                    color: '#9e2146',
-                                },
-                            },
-                        }} />
+                            }}
+                        />
                     </div>
-                    <button type="submit" disabled={!stripe || isLoading}>
-                        {isLoading ? 'Processing...' : 'Pay Now'}
+                    <button type="submit" disabled={!stripe || isProcessingPayment}>
+                        {isProcessingPayment ? 'Processing...' : 'Pay Now'}
                     </button>
                 </form>
             )}
