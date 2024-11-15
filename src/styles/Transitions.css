@@ -1,32 +1,31 @@
 /* src/styles/Transitions.css */
 
-/* Initial fade-in on appear */
+/* Appear */
 .fade-appear {
-    opacity: 0;
-  }
-  
-  .fade-appear-active {
-    opacity: 1;
-    transition: opacity 0.5s ease-in 1s; /* 1s delay before fade-in */
-  }
-  
-  /* Fade-in on enter (page transitions) */
-  .fade-enter {
-    opacity: 0;
-  }
-  
-  .fade-enter-active {
-    opacity: 1;
-    transition: opacity 0.5s ease-in 1s; /* 1s delay before fade-in */
-  }
-  
-  /* Fade-out on exit (page transitions) */
-  .fade-exit {
-    opacity: 1;
-  }
-  
-  .fade-exit-active {
-    opacity: 0;
-    transition: opacity 0.5s ease-out; /* 0.5s fade-out */
-  }
-  
+  opacity: 0;
+}
+
+.fade-appear-active {
+  opacity: 1;
+  transition: opacity 1500ms ease-in;
+}
+
+/* Enter */
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 1500ms ease-in;
+}
+
+/* Exit */
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 500ms ease-out;
+}

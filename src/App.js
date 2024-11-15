@@ -15,7 +15,7 @@ import { AuthProvider, AuthContext } from './AuthContext'; // Import AuthContext
 import './styles/App.css';
 import './styles/Transitions.css';
 
-const App = () => {
+const AppContent = () => {
   const location = useLocation();
 
   return (
@@ -23,7 +23,13 @@ const App = () => {
       <div className="app-container">
         <BackgroundVideo />
         <SwitchTransition mode="out-in">
-
+          <CSSTransition
+            key={location.pathname}
+            classNames="fade"
+            timeout={{ enter: 1500, exit: 500 }}
+            unmountOnExit
+            appear
+          >
             <div className="page-content">
               <AuthContext.Consumer>
                 {({ isAuthenticated }) => (
@@ -41,11 +47,17 @@ const App = () => {
                 )}
               </AuthContext.Consumer>
             </div>
-
+          </CSSTransition>
         </SwitchTransition>
       </div>
     </AuthProvider>
   );
 };
+
+const App = () => (
+  <Router basename="/celestialcenter">
+    <AppContent />
+  </Router>
+);
 
 export default App;
