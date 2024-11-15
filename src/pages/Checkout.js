@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 import fetchData from '../utils/fetchData';
 import { AuthContext } from '../AuthContext';
 import '../styles/Checkout.css';
@@ -10,11 +10,10 @@ import '../styles/Checkout.css';
 // **Configuration Constants**
 const BACKEND_URL = 'https://celestialcentral-835108787508.us-central1.run.app'; // Hard-coded backend URL
 
-const STRIPE_MODE = 'test'; // Set to 'test' or 'live' based on your backend configuration
-
-// **Stripe Publishable Keys**
 const STRIPE_PUBLISHABLE_KEY_TEST = 'pk_test_51N9va6BN4zP2cNNUC13AU2YRhukbIX01xUKoggNBsdxpbyR1KJKGL5AbcUwgBaAN2iofOpxn8S1gUO8uyZm2hBNH00Heo0LJxF';
-const STRIPE_PUBLISHABLE_KEY_LIVE = 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXX'; // Replace with your Live Key
+const STRIPE_PUBLISHABLE_KEY_LIVE = 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXX'; // Replace with your Live Publishable Key
+
+const STRIPE_MODE = 'test'; // Change to 'live' when switching to Live Mode
 
 // **Select the appropriate Stripe Publishable Key based on the mode**
 const stripePublishableKey = STRIPE_MODE === 'live' ? STRIPE_PUBLISHABLE_KEY_LIVE : STRIPE_PUBLISHABLE_KEY_TEST;
@@ -28,8 +27,6 @@ const CheckoutForm = () => {
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const stripe = useStripe();
-    const elements = useElements();
 
     useEffect(() => {
         if (!isAuthenticated || !user) {
@@ -58,11 +55,6 @@ const CheckoutForm = () => {
     const handlePayment = async (e) => {
         e.preventDefault();
 
-        if (!stripe || !elements) {
-            console.error('Stripe.js has not loaded yet.');
-            return;
-        }
-
         if (cartItems.length === 0) {
             alert('Your cart is empty!');
             return;
@@ -71,37 +63,28 @@ const CheckoutForm = () => {
         setIsLoading(true);
 
         try {
-            // Create PaymentIntent on the backend
-            const response = await fetch(`${BACKEND_URL}/api/checkout/create-payment-intent`, {
+            // Create Checkout Session on the backend
+            const response = await fetch(`${BACKEND_URL}/api/checkout/create-checkout-session`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.id, items: cartItems, mode: STRIPE_MODE }),
+                body: JSON.stringify({ items: cartItems }),
             });
 
             const data = await response.json();
 
-            if (!data.clientSecret) {
-                throw new Error('Failed to create payment intent');
+            if (!data.sessionId) {
+                throw new Error('Failed to create checkout session');
             }
 
-            // Confirm payment with Stripe.js
-            const cardElement = elements.getElement(CardElement);
-            const paymentResult = await stripe.confirmCardPayment(data.clientSecret, {
-                payment_method: {
-                    card: cardElement,
-                    billing_details: {
-                        name: user.name,
-                        email: user.email,
-                    },
-                },
+            // Redirect to Stripe Checkout
+            const stripe = await stripePromise;
+            const result = await stripe.redirectToCheckout({
+                sessionId: data.sessionId,
             });
 
-            if (paymentResult.error) {
-                console.error('Stripe payment failed:', paymentResult.error.message);
-                setError(paymentResult.error.message);
-            } else if (paymentResult.paymentIntent.status === 'succeeded') {
-                console.log('Payment successful');
-                navigate('/checkedout');
+            if (result.error) {
+                console.error('Stripe checkout error:', result.error.message);
+                setError(result.error.message);
             }
         } catch (err) {
             console.error('Payment failed:', err);
@@ -129,8 +112,9 @@ const CheckoutForm = () => {
                             </li>
                         ))}
                     </ul>
-                    <CardElement /> {/* Securely collect card details */}
-                    <button type="submit" disabled={!stripe || isLoading}>
+                    {/* Remove CardElement as Stripe Checkout handles payment details */}
+                    {/* <CardElement /> */}
+                    <button type="submit" disabled={isLoading}>
                         {isLoading ? 'Processing...' : 'Pay Now'}
                     </button>
                 </form>
