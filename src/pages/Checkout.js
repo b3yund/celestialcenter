@@ -23,14 +23,14 @@ const CheckoutForm = () => {
     const elements = useElements();
 
     useEffect(() => {
-        if (!isAuthenticated || !user) {
+        {/*if (!isAuthenticated || !user) {
             navigate('/login');
             return;
-        }
+        }*/}
 
         const fetchCartAndPaymentIntent = async () => {
             setIsLoading(true);
-            {/*try {
+            try {
                 const data = await fetchData(`${BACKEND_URL}/api/cart/${user.id}`);
                 setCartItems(data);
 
@@ -59,7 +59,7 @@ const CheckoutForm = () => {
                 setCartItems([]);
             } finally {
                 setIsLoading(false);
-            }*/}
+            }
         };
 
         fetchCartAndPaymentIntent();

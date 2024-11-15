@@ -13,10 +13,10 @@ const Cart = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
+    {/*if (!isAuthenticated || !user) {
       navigate('/login');
       return;
-    }
+    }*/}
 
     const fetchCart = async () => {
       try {
