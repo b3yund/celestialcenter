@@ -1,4 +1,3 @@
-// src/pages/Checkout.js
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
@@ -7,26 +6,17 @@ import fetchData from '../utils/fetchData';
 import { AuthContext } from '../AuthContext';
 import '../styles/Checkout.css';
 
-// **Configuration Constants**
-const BACKEND_URL = 'https://celestialcentral-835108787508.us-central1.run.app'; // Backend URL
-
+const BACKEND_URL = 'https://celestialcentral-835108787508.us-central1.run.app';
 const STRIPE_PUBLISHABLE_KEY_TEST = 'pk_test_51N9va6BN4zP2cNNUC13AU2YRhukbIX01xUKoggNBsdxpbyR1KJKGL5AbcUwgBaAN2iofOpxn8S1gUO8uyZm2hBNH00Heo0LJxF';
-const STRIPE_PUBLISHABLE_KEY_LIVE = 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXX'; // Replace with your Live Publishable Key
 
-const STRIPE_MODE = 'test'; // Change to 'live' when switching to Live Mode
-
-// **Select the appropriate Stripe Publishable Key based on the mode**
-const stripePublishableKey = STRIPE_MODE === 'live' ? STRIPE_PUBLISHABLE_KEY_LIVE : STRIPE_PUBLISHABLE_KEY_TEST;
-
-// **Initialize Stripe.js with the selected Publishable Key**
-const stripePromise = loadStripe(stripePublishableKey);
+const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY_TEST);
 
 const CheckoutForm = () => {
     const { isAuthenticated, user } = useContext(AuthContext);
     const [cartItems, setCartItems] = useState([]);
     const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(false); // For data loading
-    const [isProcessingPayment, setIsProcessingPayment] = useState(false); // For payment processing
+    const [isLoading, setIsLoading] = useState(false);
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [clientSecret, setClientSecret] = useState(null);
     const navigate = useNavigate();
     const stripe = useStripe();
@@ -41,11 +31,9 @@ const CheckoutForm = () => {
         const fetchCartAndPaymentIntent = async () => {
             setIsLoading(true);
             try {
-                // Fetch cart items
                 const data = await fetchData(`${BACKEND_URL}/api/cart/${user.id}`);
                 setCartItems(data);
 
-                // Create a PaymentIntent on the backend
                 const response = await fetch(`${BACKEND_URL}/api/checkout/create-payment-intent`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -95,9 +83,13 @@ const CheckoutForm = () => {
 
         try {
             const cardElement = elements.getElement(CardElement);
+
             if (!cardElement) {
+                console.error('CardElement not found or not mounted.');
                 throw new Error('CardElement not found');
             }
+
+            console.log('CardElement is mounted:', cardElement);
 
             const paymentResult = await stripe.confirmCardPayment(clientSecret, {
                 payment_method: {
