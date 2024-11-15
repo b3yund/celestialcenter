@@ -1,4 +1,4 @@
-// src/components/Checkout.js
+// src/pages/Checkout.js
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
@@ -37,7 +37,7 @@ const CheckoutForm = () => {
             return;
         }
 
-        const fetchCart = async () => {
+        const fetchCartAndPaymentIntent = async () => {
             setIsLoading(true);
             try {
                 // Fetch cart items
@@ -52,7 +52,8 @@ const CheckoutForm = () => {
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Server error: ${response.statusText}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Server error');
                 }
 
                 const paymentIntent = await response.json();
@@ -72,7 +73,7 @@ const CheckoutForm = () => {
             }
         };
 
-        fetchCart();
+        fetchCartAndPaymentIntent();
     }, [isAuthenticated, user, navigate]);
 
     const handlePayment = async (e) => {
@@ -93,6 +94,10 @@ const CheckoutForm = () => {
 
         try {
             const cardElement = elements.getElement(CardElement);
+            if (!cardElement) {
+                throw new Error('CardElement not found');
+            }
+
             const paymentResult = await stripe.confirmCardPayment(clientSecret, {
                 payment_method: {
                     card: cardElement,
