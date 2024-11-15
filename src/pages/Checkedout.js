@@ -17,15 +17,17 @@ const Checkedout = () => {
     const sessionId = queryParams.get('session_id');
   
     useEffect(() => {
+      // Redirect to login if not authenticated
       if (!isAuthenticated || !user) {
         navigate('/login');
         return;
       }
   
-      if (!sessionId) {
+      // Display error if no session ID is found
+      {/*if (!sessionId) {
         setLicenseError('No session ID found. Unable to verify purchase.');
         return;
-      }
+      }*/}
   
       // Function to fetch licenses
       const fetchLicenses = async () => {
@@ -65,18 +67,20 @@ const Checkedout = () => {
       // Execute both functions independently
       fetchLicenses();
       clearCart();
-    }, [isAuthenticated, user, navigate, sessionId, BACKEND_URL]);
+    }, [isAuthenticated, user, navigate, sessionId]);
   
     return (
-      <div className="checkedout-container">
+      <div className="checkedout-container" style={styles.container}>
         <h1>Thank you for your purchase!</h1>
         
         {/* Display License Information */}
         {licenseError ? (
-          <div className="error-message" style={{ color: 'red' }}>{licenseError}</div>
+          <div className="error-message" style={styles.error}>
+            {licenseError}
+          </div>
         ) : licenses.length > 0 ? (
           licenses.map((license) => (
-            <div key={license.licenseKey} className="license-details">
+            <div key={license.licenseKey} className="license-details" style={styles.license}>
               <h2>License Key: {license.licenseKey}</h2>
               <p>Uses Remaining: {license.usesRemaining}</p>
               <h3>Purchased Products:</h3>
@@ -94,23 +98,24 @@ const Checkedout = () => {
         )}
   
         {/* Display Cart Clearing Status */}
-        {cartError && (
-          <div className="error-message" style={{ color: 'red' }}>
+        {cartError ? (
+          <div className="error-message" style={styles.error}>
             {cartError}
           </div>
-        )}
-  
-        {!licenseError && !cartError && (
-          <div className="success-message" style={{ color: 'green' }}>
+        ) : (
+          <div className="success-message" style={styles.success}>
             Your cart has been cleared.
           </div>
         )}
   
-        <button onClick={() => navigate('/')} className="return-home-button" style={{ marginTop: '20px' }}>
+        <button
+          onClick={() => navigate('/')}
+          className="return-home-button"
+          style={styles.button}
+        >
           Return to Home
         </button>
       </div>
     );
   };
-  
 export default Checkedout;
