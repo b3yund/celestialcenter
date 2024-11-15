@@ -43,7 +43,7 @@ const Checkedout = () => {
       // Function to clear the cart
       const clearCart = async () => {
         try {
-          const response = await fetch(`${BACKEND_URL}/api/cart/clear`, {
+          const response = await fetchData(`${BACKEND_URL}/api/cart/clear`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: user.id }),
