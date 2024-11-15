@@ -5,7 +5,7 @@ import { AuthContext } from '../AuthContext';
 import '../styles/Cart.css';
 
 const Cart = () => {
-  const { isAuthenticated, user, logout } = useContext(AuthContext); // Access user and logout from AuthContext
+  const { isAuthenticated, user, logout } = useContext(AuthContext); // Access user and logout
   const [cartItems, setCartItems] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
