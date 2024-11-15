@@ -38,35 +38,51 @@ const Checkedout = () => {
     }
   };
 
-  // Add this helper function at the top level of the component
+  // Update downloadAllProducts function
   const downloadAllProducts = async (products) => {
     console.log('Starting downloads for products:', products);
     
     for (const product of products) {
       try {
-        console.log(`Downloading product ${product.productId}: ${product.name}`);
-        setDownloadStatus(prev => ({ ...prev, [product.productId]: 'downloading' }));
+        console.log(`Attempting download for product ${product.productId}: ${product.name}`);
         
-        const response = await fetch(`${BACKEND_URL}/api/products/${product.productId}/download`);
-        if (!response.ok) {
-          throw new Error(`Download failed with status: ${response.status}`);
+        // First verify product exists
+        const productCheck = await fetch(`${BACKEND_URL}/api/products/${product.productId}`);
+        if (!productCheck.ok) {
+          throw new Error(`Product verification failed: ${productCheck.status}`);
         }
         
-        const blob = await response.blob();
-        console.log(`Blob received for ${product.name}:`, blob);
-  
-        // Force download using blob
+        setDownloadStatus(prev => ({ ...prev, [product.productId]: 'downloading' }));
+        
+        // Then attempt download
+        const downloadResponse = await fetch(`${BACKEND_URL}/api/products/${product.productId}/download`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`, // Add if using auth
+            'Accept': 'application/octet-stream'
+          }
+        });
+
+        if (!downloadResponse.ok) {
+          throw new Error(`Download failed with status: ${downloadResponse.status}`);
+        }
+
+        const contentType = downloadResponse.headers.get('content-type');
+        console.log(`Download response type: ${contentType}`);
+        
+        const blob = await downloadResponse.blob();
+        console.log(`Received blob size: ${blob.size} bytes`);
+
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = `${product.name}.zip`; // Add appropriate extension
+        // Get file extension from content-type or default to .zip
+        const extension = contentType?.split('/')[1] || 'zip';
+        a.download = `${product.name}.${extension}`;
         
-        // Need to append to document for Firefox
         document.body.appendChild(a);
         a.click();
         
-        // Cleanup
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
         
@@ -75,10 +91,11 @@ const Checkedout = () => {
       } catch (error) {
         console.error(`Download failed for ${product.name}:`, error);
         setDownloadStatus(prev => ({ ...prev, [product.productId]: 'failed' }));
+        // Continue with next product instead of stopping
       }
       
-      // Add delay between downloads to prevent browser blocking
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Delay between downloads
+      await new Promise(resolve => setTimeout(resolve, 1500));
     }
   };
 
