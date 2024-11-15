@@ -63,7 +63,7 @@ const Checkedout = () => {
       };
   
       // Execute both functions independently
-      fetchLicenses();
+      //fetchLicenses();
       clearCart();
     }, [isAuthenticated, user, navigate, sessionId, BACKEND_URL]);
   
