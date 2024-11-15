@@ -38,31 +38,47 @@ const Checkedout = () => {
     }
   };
 
-  // Add this helper function
+  // Add this helper function at the top level of the component
   const downloadAllProducts = async (products) => {
+    console.log('Starting downloads for products:', products);
+    
     for (const product of products) {
       try {
+        console.log(`Downloading product ${product.productId}: ${product.name}`);
         setDownloadStatus(prev => ({ ...prev, [product.productId]: 'downloading' }));
         
         const response = await fetch(`${BACKEND_URL}/api/products/${product.productId}/download`);
-        if (!response.ok) throw new Error('Download failed');
+        if (!response.ok) {
+          throw new Error(`Download failed with status: ${response.status}`);
+        }
         
         const blob = await response.blob();
+        console.log(`Blob received for ${product.name}:`, blob);
+  
+        // Force download using blob
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
+        a.style.display = 'none';
         a.href = url;
-        a.download = product.name;
+        a.download = `${product.name}.zip`; // Add appropriate extension
+        
+        // Need to append to document for Firefox
         document.body.appendChild(a);
         a.click();
+        
+        // Cleanup
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
         
+        console.log(`Download completed for ${product.name}`);
         setDownloadStatus(prev => ({ ...prev, [product.productId]: 'completed' }));
-        console.log(`Downloaded product: ${product.name}`);
       } catch (error) {
-        console.error(`Download error for ${product.name}:`, error);
+        console.error(`Download failed for ${product.name}:`, error);
         setDownloadStatus(prev => ({ ...prev, [product.productId]: 'failed' }));
       }
+      
+      // Add delay between downloads to prevent browser blocking
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   };
 
@@ -75,12 +91,15 @@ const Checkedout = () => {
     // Modify createLicensesAndClearCart
     const createLicensesAndClearCart = async () => {
       try {
+        // Get cart items
         const cartItems = await fetchData(`${BACKEND_URL}/api/cart/${user.id}`);
+        console.log('Cart items:', cartItems);
+        
         if (!cartItems || cartItems.length === 0) {
           setLicenseError('Your cart is empty');
           return;
         }
-
+    
         // Create licenses
         const licenseResponse = await fetchData(`${BACKEND_URL}/api/licenses`, {
           method: 'POST',
@@ -95,16 +114,17 @@ const Checkedout = () => {
           })
         });
         console.log('Licenses created:', licenseResponse);
-
+    
         // Fetch updated licenses
         const userLicenses = await fetchData(`${BACKEND_URL}/api/licenses/${user.id}`);
         console.log('User licenses fetched:', userLicenses);
         setLicenses(userLicenses.licenses);
-
+    
         // Download all products
+        console.log('Starting download process...');
         await downloadAllProducts(cartItems);
         console.log('All downloads completed');
-
+    
         // Clear cart only after downloads complete
         await fetchData(`${BACKEND_URL}/api/cart/clear`, {
           method: 'DELETE',
@@ -112,7 +132,7 @@ const Checkedout = () => {
           body: JSON.stringify({ userId: user.id })
         });
         console.log('Cart cleared successfully');
-
+    
       } catch (error) {
         console.error('Checkout process error:', error);
         setLicenseError('Failed to process checkout. Please contact support.');
