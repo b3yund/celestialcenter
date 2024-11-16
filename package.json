@@ -2,7 +2,7 @@
   "name": "celestialcenter",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://b3yund.github.io/celestialcenter",
+  "homepage": "https://celestialcenter.store",
   "dependencies": {
     "@stripe/react-stripe-js": "^2.9.0",
     "@stripe/stripe-js": "^4.10.0",
