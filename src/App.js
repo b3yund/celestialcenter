@@ -1,5 +1,5 @@
 // src/App.js
-import React from 'react';
+import React, { useRef } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import Home from './pages/Home';
@@ -17,6 +17,7 @@ import './styles/Transitions.css';
 
 const App = () => {
   const location = useLocation();
+  const nodeRef = useRef(null); // Create a ref for the transitioning element
 
   return (
     <AuthProvider>
@@ -29,8 +30,9 @@ const App = () => {
             timeout={{ enter: 1500, exit: 500 }}
             unmountOnExit
             appear
+            nodeRef={nodeRef} // Use nodeRef to avoid findDOMNode
           >
-            <div className="page-content">
+            <div className="page-content" ref={nodeRef}>
               <AuthContext.Consumer>
                 {({ isAuthenticated }) => (
                   <Routes location={location}>
